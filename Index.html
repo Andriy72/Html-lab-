@@ -1,0 +1,417 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8"/>
+	<title>DETECTING HTML5 FEATURES</title>
+	You are here: <a href="">Home </a>‣ <a href="">Dive Into HTML5 </a> ‣</header>
+
+</head>
+
+	<body align="center">
+	
+	<h1>№2</h1>
+		<h1>DETECTING HTML5 FEATURES</h1><br/>
+		
+		<a href="#"> show table of contents</a><br/>
+		   <h1>❧</h1><br/>
+		<h2>DIVING IN</h2>
+		    <p> <img src="aoc-y.png" width="100px" /> </p>
+		<p>ou may well ask: “How can I start using HTML5 if older browsers don’t support it?” But the question itself is misleading. HTML5 is not one big thing; it is a collection of individual features. So you can’t detect “HTML5 support,” because that doesn’t make any sense. But you can detect support for individual features, like canvas, video, or geolocation.</p>
+		
+		<h1>❧</h1><br/>
+		  <h2>DETECTION TECHNIQUES</h2>
+		
+		<p>When your browser renders a web page, it constructs a Document Object Model (DOM), a collection of objects that represent the HTML elements on the page. Every element— every p, every div, every span — is represented in the DOM by a different object. (There are also global objects, like window and document, that aren’t tied to specific elements.)</p>
+		 <img src="openclipart.org_johnny_automatic_peeking_out_the_window.png" width="100px" />
+		<p>All DOM objects share a set of common properties, but some objects have more than others. In browsers that support HTML5 features, certain objects will have unique properties. A quick peek at the DOM will tell you which features are supported.</p>
+		  <p>There are four basic techniques for detecting whether a browser supports a particular feature. From simplest to most complex:</p>
+		<p>1. Check if a certain property exists on a global object (such as window or navigator).</p>
+		 <p>Example: <a href="#">testing for geolocation support</a></p>
+		<p>2. Create an element, then check if a certain property exists on that element.</p>
+		   <p>Example: <a href="#">testing for canvas support</a></p>
+		<p>3. Create an element, check if a certain method exists on that element, then call the method and check the value it returns.</p>
+		  <p>Example: <a href="#">testing which video formats are supported</a></p>
+		<p>4. Create an element, set a property to a certain value, then check if the property has retained its value.</p>
+		  <p>Example: <a href="#">testing which input types are supported</a></p>
+		
+		<h1>❧</h1><br/>
+		   <h2>MODERNIZR, AN HTML5 DETECTION LIBRARY</h2>
+		<p><a href="#">Modernizr</a> is an open source, MIT-licensed JavaScript library that detects support for many HTML5 & CSS3 features. You should always use the latest version. To use it, include the following script element at the top of your page.</p>
+		<p class="legend right" style="margin-top:7em">It goes to your &lt;head&gt;
+
+</p>
+		  <p>Modernizr runs automatically. There is no modernizr_init() function to call. When it runs, it creates a global object called Modernizr, that contains a set of Boolean properties for each feature it can detect. For example, if your browser supports the canvas API, the Modernizr.canvas property will be true. If your browser does not support the canvas API, the Modernizr.canvas property will be false.</p>
+	
+		
+		<h1>❧</h1><br/>
+		 <h2>CANVAS</h2>
+		<img src="openclipart.org_johnny_automatic_fishing_boat.png" width="300px" />
+		<p>HTML5 defines <a href="#">the canvas element</a> as “a resolution-dependent bitmap canvas that can be used for rendering graphs, game graphics, or other visual images on the fly.” A canvas is a rectangle in your page where you can use JavaScript to draw anything you want. HTML5 defines a set of functions (“the canvas API”) for drawing shapes, defining paths, creating gradients, and applying transformations.</p>
+		<p>Checking for the canvas API uses <a href="#"> detection technique #2</a>. If your browser supports the canvas API, the DOM object it creates to represent a <canvas> element will have a <a href="#">getContext() method</a>. If your browser doesn’t support the canvas API, the DOM object it creates for a canvas element will only have the set of common properties, but not anything canvas-specific.</p>
+		<img src="pe3.png" width="500px" />
+		<p>This function starts by creating a dummy canvas element. But the element is never attached to your page, so no one will ever see it. It’s just floating in memory, going nowhere and doing nothing, like a canoe on a lazy river.</p>
+		<p><code>return !!document.<mark>createElement('canvas')</mark>.getContext;</code></p>
+		<p>As soon as you create the dummy <code>&lt;canvas></code> element, you test for the presence of a <code>getContext()</code> method. This method will only exist if your browser supports the canvas API.
+		<p><code>return !!document.createElement('canvas').<mark>getContext</mark>;</code></p>
+		<p>Finally, you use the double-negative trick to force the result to a Boolean value (<code>true</code> or <code>false</code>).
+		<p><code>return <mark>!!</mark>document.createElement('canvas').getContext;</code></p>
+		<p>This function will detect support for most of the canvas API, including <a href=#>shapes</a>, <a href=#>paths</a>, <a href=#>gradients patterns</a>. It will not detect the third-party <a href=#><code>explorercanvas</code> library</a> that implements the canvas API in Microsoft Internet Explorer.
+		<p>Instead of writing this function yourself, you can use <a href=#>Modernizr</a> to detect support for the canvas API.
+		<p> check for canvas support </p>
+		<p><code>if (<mark>Modernizr.canvas</mark>) {
+		  // let's draw some shapes!
+		} else {
+		  // no native canvas support available :(
+		}</code></p>
+		<p>There is a separate test for the canvas text API, which I will demonstrate next.</p>
+		
+		<h1>❧</h1><br/>
+		<h2>Canvas Text</h2>
+		<img src="openclipart.org_johnny_automatic_baseball_at_bat.png" width="500px" />
+		<p>Even if your browser supports the <a href=#>canvas API</a>, it might not support the <dfn>canvas text</dfn> API. The canvas API grew over time, and the text functions were added late in the game. Some browsers shipped with canvas support before the text API was complete.
+		<p>Checking for the canvas text API uses <a href=#>detection technique #2</a>. If your browser supports the canvas API, the DOM object it creates to represent a <code>&lt;canvas></code> element will have the <a href=#><code>getContext()</code> method</a>. If your browser doesnt support the canvas API, the DOM object it creates for a <code>&lt;canvas></code> element will only have the set of common properties, but not anything canvas-specific.
+		<pre><code>function supports_canvas_text() {
+		  if (!supports_canvas()) { return false; }
+		  var dummy_canvas = document.createElement('canvas');
+		  var context = dummy_canvas.getContext('2d');
+		  return typeof context.fillText == 'function';
+		}</code></pre>
+		<p>The function starts by <a href=#>checking for canvas support</a>, using the <code>supports_canvas()</code> function you just saw in the previous section. If your browser doesnt support the canvas API, it certainly wont support the canvas text API!
+		<pre><code>if (<mark>!supports_canvas()</mark>) { return false; }</code></pre>
+		<p>Next, you create a dummy <code>&lt;canvas></code> element and get its drawing context. This is guaranteed to work, because the <code>supports_canvas()</code> function already checked that the <code>getContext()</code> method exists on all canvas objects.
+		<pre><code>  var dummy_canvas = document.createElement('canvas');
+		  var context = <mark>dummy_canvas.getContext('2d')</mark>;</code></pre>
+		<p>Finally, you check whether the drawing context has a <code>fillText()</code> function. If it does, the canvas text API is available. Hooray!
+		<pre><code>  return <mark>typeof context.fillText == 'function'</mark>;</code></pre>
+		<p>Instead of writing this function yourself, you can use <a href=#>Modernizr</a> to detect support for the canvas text API.
+		<p> check for canvas text support</p>
+		<pre><code>if (<mark>Modernizr.canvastext</mark>) {
+		  // let's draw some text!
+		} else {
+		  // no native canvas text support available :(
+		}</code></pre>
+		
+		<h1>❧</h1><br/>
+		<h2>Video</h2>
+		<p>HTML5 defines a new element called <code>&lt;video></code> for embedding video in your web pages. Embedding video used to be impossible without third-party plugins such as Apple QuickTime or Adobe Flash.
+		
+		
+		
+		<p>The <code>&lt;video></code> element is designed to be usable without any detection scripts. You can specify multiple video files, and browsers that support HTML5 video will choose one based on what video formats they support. (See A gentle introduction to video encoding <a href=#>part 1: container formats</a> and <a href=#>part 2: lossy video codecs</a> to learn about different video formats.)
+		<p>Browsers that dont support HTML5 video will ignore the <code>&lt;video></code> element completely, but you can use this to your advantage and tell them to play video through a third-party plugin instead. Kroc Camen has designed a solution called <a href=#>Video for Everybody!</a> that uses HTML5 video where available, but falls back to QuickTime or Flash in older browsers. This solution uses no JavaScript whatsoever, and it works in virtually every browser, including mobile browsers.
+		<img src="openclipart.org_johnny_automatic_at_the_theater.png" width="300px" />
+		<p>If you want to do more with video than plop it on your page and play it, youll need to use JavaScript. Checking for video support uses <a href=#>detection technique #2</a>. If your browser supports HTML5 video, the DOM object it creates to represent a <code>&lt;video></code> element will have a <code>canPlayType()</code> method. If your browser doesnt support HTML5 video, the DOM object it creates for a <code>&lt;video></code> element will have only the set of properties common to all elements. You can check for video support using this function:
+		<pre><code>function supports_video() {
+		  return !!document.createElement('video').canPlayType;
+		}</code></pre>
+		<p>Instead of writing this function yourself, you can use <a href=#>Modernizr</a> to detect support for HTML5 video.
+		<p> check for HTML5 video support </p>
+		<pre><code>if (<mark>Modernizr.video</mark>) {
+		  // let's play some video!
+		} else {
+		  // no native video support available :(
+		  // maybe check for QuickTime or Flash instead
+		}</code></pre>
+		<p>In <a href=#>the Video chapter</a>, Ill explain another solution that uses these detection techniques to convert <code>&lt;video></code> elements to Flash-based video players, for the benefit of browsers that dont support HTML5 video.
+		<p>There is a separate test for detecting which video formats your browser can play, which I will demonstrate next.
+		
+		<h1>❧</h1><br/>
+		<h2 >Video Formats</h2>
+		<p>Video formats are like written languages. An English newspaper may convey the same information as a Spanish newspaper, but if you can only read English, only one of them will be useful to you! To play a video, your browser needs to understand the language in which the video was written.
+		<img src="openclipart.org_johnny_automatic_man_reading_newspaper.png" width="300px" />
+		<p>The language of a video is called a codec - this is the algorithm used to encode the video into a stream of bits. There are dozens of codecs in use all over the world. Which one should you use? The unfortunate reality of HTML5 video is that browsers cant agree on a single codec. However, they seem to have narrowed it down to two. One codec costs money (because of patent licensing), but it works in <a href=#/>Safari</a> and on the iPhone.  (This one also works in Flash if you use a solution like <a href=#>Video for Everybody!</a>) The other codec is free and works in open source browsers like <a href=#/>Chromium</a> and <a href=#/>Mozilla Firefox</a>.
+		<p>Checking for video format support uses <a href=#>detection technique #3</a>. If your browser supports HTML5 video, the DOM object it creates to represent a <code>&lt;video></code> element will have a <code>canPlayType()</code> method. This method will tell you whether the browser supports a particular video format.
+		<p>This function checks for the patent-encumbered format supported by Macs and iPhones.
+		<pre><code>function supports_h264_baseline_video() {
+		  if (!supports_video()) { return false; }
+		  var v = document.createElement("video");
+		  return v.canPlayType('video/mp4; codecs="avc1.42E01E, mp4a.40.2"');
+		}</code></pre>
+		<p>The function starts by <a href=#>checking for HTML5 video support</a>, using the supports_video() function you just saw in the previous section. If your browser doesnt support HTML5 video, it certainly wont support any video formats!
+		<pre><code>  if (<mark>!supports_video()</mark>) { return false; }</code></pre>
+		<p>Then the function creates a dummy <code>&lt;video></code> element (but doesnt attach it to the page, so it wont be visible) and calls the <code>canPlayType()</code> method. This method is guaranteed to be there, because the <code>supports_video()</code> function just checked for it.
+		<pre><code>  var <mark>v</mark> = document.createElement("video");</code></pre>
+		<p>A video format is really a combination of different things. In technical terms, youre asking the browser whether it can play H.264 Baseline video and AAC LC audio in an MPEG-4 container. (Ill explain what all that means in <a href=#>the Video chapter</a>. You might also be interested in reading <a href=#>A gentle introduction to video encoding</a>.)
+		<pre><code>  return v.canPlayType('<mark>video/mp4; codecs="avc1.42E01E, mp4a.40.2"</mark>');</code></pre>
+		<p>The <code>canPlayType()</code> function doesnt return <code>true</code> or <code>false</code>. In recognition of how complex video formats are, the function returns a string:
+		<ul>
+		<li><code>"probably"</code> if the browser is fairly confident it can play this format
+		<li><code>"maybe"</code> if the browser thinks it might be able to play this format
+		<li><code>""</code> (an empty string) if the browser is certain it cant play this format
+		</ul>
+		<p>This second function checks for the open video format supported by Mozilla Firefox and other open source browsers. The process is exactly the same; the only difference is the string you pass in to the <code>canPlayType()</code> function. In technical terms, youre asking the browser whether it can play Theora video and Vorbis audio in an Ogg container.
+		<pre><code>function supports_ogg_theora_video() {
+		  if (!supports_video()) { return false; }
+		  var v = document.createElement("video");
+		  return v.canPlayType(<mark>'video/ogg; codecs="theora, vorbis"'</mark>);
+		}</code></pre>
+		<p>Finally, <a href=#/>WebM</a> is a newly open-sourced (and non-patent-encumbered) video codec that will be included in the next version of major browsers, including Chrome, <a href=#>Firefox</a>, and <a href=#>Opera</a>. You can use the same technique to detect support for open WebM video.
+		<pre><code>function supports_webm_video() {
+		  if (!supports_video()) { return false; }
+		  var v = document.createElement("video");
+		  return v.canPlayType(<mark>'video/webm; codecs="vp8, vorbis"'</mark>);
+		}</code></pre>
+		<p>Instead of writing this function yourself, you can use <a href=#>Modernizr</a> (1.5 or later) to detect support for different HTML5 video formats.
+		<p> check for HTML5 video formats </p>
+		<pre><code>if (Modernizr.video) {
+		  // let's play some video! but what kind?
+		  if (<mark>Modernizr.video.webm</mark>) {
+		    // try WebM
+		  } else if (<mark>Modernizr.video.ogg</mark>) {
+		    // try Ogg Theora + Vorbis in an Ogg container
+		  } else if (<mark>Modernizr.video.h264</mark>){
+		    // try H.264 video + AAC audio in an MP4 container
+		  }
+		}</code></pre>
+		
+		<h1>❧</h1><br/>
+		<h2>Local Storage</h2>
+		<img src="openclipart.org_johnny_automatic_half_stack_of_horizontal_sections.png" width="150px" />
+		<p><a href=#>HTML5 storage</a> provides a way for web sites to store information on your computer and retrieve it later. The concept is similar to cookies, but its designed for larger quantities of information. Cookies are limited in size, and your browser sends them back to the web server every time it requests a new page (which takes extra time and precious bandwidth). HTML5 storage stays on your computer, and web sites can access it with JavaScript after the page is loaded.
+		<div >
+		<h4>Ask Professor Markup</h4>
+		<div >
+		<blockquote >
+		<p>☞Q: Is local storage really part of HTML5? Why is it in a separate specification?<br>
+		A: The short answer is yes, local storage is part of HTML5. The slightly longer answer is that local storage used to be part of the main HTML5 specification, but it was split out into a separate specification because some people in the HTML5 Working Group complained that HTML5 was too big. If that sounds like slicing a pie into more pieces to reduce the total number of calories... well, welcome to the wacky world of standards.
+		</blockquote>
+		</div>
+		</div>
+		<p>Checking for HTML5 storage support uses <a href=#>detection technique #1</a>. If your browser supports HTML5 storage, there will be a <code>localStorage</code> property on the global <code>window</code> object. If your browser doesnt support HTML5 storage, the <code>localStorage</code> property will be undefined. Due to an unfortunate bug in older versions of Firefox, this test will raise an exception if cookies are disabled, so the entire test is wrapped in a <code>try..catch</code> statement.
+		<pre><code>function supports_local_storage() {
+		  try {
+		    return 'localStorage' in window && window['localStorage'] !== null;
+		  } catch(e){
+		    return false;
+		  }
+		}</code></pre>
+		<p>Instead of writing this function yourself, you can use <a href=#>Modernizr</a> (1.1 or later) to detect support for HTML5 local storage.
+		<p> check for HTML5 local storage</p>
+		<pre><code>if (<mark>Modernizr.localstorage</mark>) {
+		  // window.localStorage is available!
+		} else {
+		  // no native support for local storage :(
+		  // maybe try Gears or another third-party solution
+		}</code></pre>
+		<p>Note that JavaScript is case-sensitive. The Modernizr attribute is called <code>localstorage</code> (all lowercase), but the DOM property is called <code>window.localStorage</code> (mixed case).
+		<div >
+		<h4>Ask Professor Markup</h4>
+		<div >
+		<blockquote >
+		<p>☞Q: How secure is my HTML5 storage database? Can anyone read it?<br>
+		A: Anyone who has physical access to your computer can probably look at (or even change) your HTML5 storage database. Within your browser, any web site can read and modify its own values, but sites cant access values stored by other sites. This is called a <a href=#>same-origin restriction</a>.
+		</blockquote>
+		</div>
+		</div>
+		
+		<h1>❧</h1><br/>
+		<h2 >Web Workers</h2>
+		<p><a href=#/>Web Workers</a> provide a standard way for browsers to run JavaScript in the background. With web workers, you can spawn multiple threads that all run at the same time, more or less. (Think of how your computer can run multiple applications at the same time, and youre most of the way there.) These background threads can do complex mathematical calculations, make network requests, or access <a href=#>local storage</a> while the main web page responds to the user scrolling, clicking, or typing.
+		<p>Checking for web workers uses <a href=#>detection technique #1</a>. If your browser supports the Web Worker API, there will be a <code>Worker</code> property on the global <code>window</code> object. If your browser doesnt support the Web Worker API, the <code>Worker</code> property will be undefined.
+		<pre><code>function supports_web_workers() {
+		  return !!window.Worker;
+		}</code></pre>
+		<p>Instead of writing this function yourself, you can use <a href=#>Modernizr</a> (1.1 or later) to detect support for web workers.
+		<p> check for web workers</p>
+		<pre><code>if (<mark>Modernizr.webworkers</mark>) {
+		  // window.Worker is available!
+		} else {
+		  // no native support for web workers :(
+		  // maybe try Gears or another third-party solution
+		}</code></pre>
+		<p>Note that JavaScript is case-sensitive. The Modernizr attribute is called <code>webworkers</code> (all lowercase), but the DOM object is called <code>window.Worker</code> (with a capital W in Worker).
+		
+		<h1>❧</h1><br/>
+		<h2 >Offline Web Applications</h2>
+		<img src="openclipart.org_johnny_automatic_cabin_along_stream.png" width="300px" />
+		<p>Reading static web pages offline is easy: connect to the Internet, load a web page, disconnect from the Internet, drive to a secluded cabin, and read the web page at your leisure. (To save time, you may wish to skip the step about the cabin.) But what about web applications like <a href=#>Gmail</a> or <a href=#>Google Docs</a>? Thanks to HTML5, anyone (not just Google!) can build a web application that works offline.
+		<p><a href=#>Offline web applicationxs</a> start out as online web applications. The first time you visit an offline-enabled web site, the web server tells your browser which files it needs in order to work offline. These files can be anything -HTML, JavaScript, images, even <a href=#>videos</a>. Once your browser downloads all the necessary files, you can revisit the web site even if youre not connected to the Internet. Your browser will notice that youre offline and use the files it has already downloaded. When you get back online, any changes youve made can be uploaded to the remote web server.
+		<p>Checking for offline support uses <a href=#>detection technique #1</a>. If your browser supports offline web applications, there will be an <code>applicationCache</code> property on the global <code>window</code> object. If your browser doesnt support offline web applications, the <code>applicationCache</code> property will be undefined. You can check for offline support with the following function:
+		<pre><code>function supports_offline() {
+		  return !!window.applicationCache;
+		}</code></pre>
+		<p>Instead of writing this function yourself, you can use <a href=#>Modernizr</a> (1.1 or later) to detect support for offline web applications.
+		<p> check for offline support</p>
+		<pre><code>if (<mark>Modernizr.applicationcache</mark>) {
+		  // window.applicationCache is available!
+		} else {
+		  // no native support for offline :(
+		  // maybe try Gears or another third-party solution
+		}</code></pre>
+		<p>Note that JavaScript is case-sensitive. The Modernizr attribute is called <code>applicationcache</code> (all lowercase), but the DOM> object is called <code>window.applicationCache</code> (mixed case).
+		
+		<h1>❧</h1><br/>
+		<h2 >Geolocation</h2>
+		<p>Geolocation is the art of figuring out where you are in the world and (optionally) sharing that information with people you trust. There is more than one way to figure out where you are - your IP address, your wireless network connection, which cell tower your phone is talking to, or dedicated GPS hardware that calculates latitude and longitude from information sent by satellites in the sky.</p>
+		<img src="openclipart.org_johnny_automatic_globe_man.png" width="150px" />
+		<div >
+		<h4>Ask Professor Markup</h4>
+		<div >
+		<blockquote >
+		<p>☞Q: Is geolocation part of HTML5? Why are you talking about it?<br>
+		A: Geolocation support is being added to browsers right now, along with support for new HTML5 features. Strictly speaking, geolocation is being standardized by the <a href=#>Geolocation Working Group</a>, which is separate from the HTML5 Working Group. But I;m going to talk about geolocation in this book anyway, because its part of the evolution of the web thats happening now.
+		</blockquote>
+		</div>
+		</div>
+		<p>Checking for geolocation support uses <a href=#>detection technique #1</a>. If your browser supports the geolocation API, there will be a <code>geolocation</code> property on the global <code>navigator</code> object. If your browser doesnt support the geolocation API, the <code>geolocation</code> property will be undefined. Heres how to check for geolocation support:
+		<pre><code>function supports_geolocation() {
+		  return !!navigator.geolocation;
+		}</code></pre>
+		<p>Instead of writing this function yourself, you can use <a href=#>Modernizr</a> to detect support for the geolocation API.
+		<p> check for geolocation support</p>
+		<pre><code>if (<mark>Modernizr.geolocation</mark>) {
+		  // let's find out where you are!
+		} else {
+		  // no native geolocation support available :(
+		  // maybe try Gears or another third-party solution
+		}</code></pre>
+		<p>If your browser does not support the geolocation API natively, there is still hope. <a href=#>Gears</a> is an open source browser plugin from Google that works on Windows, Mac, Linux, Windows Mobile, and Android. It provides features for older browsers that do not support all the fancy new stuff weve discussed in this chapter. One of the features that Gears provides is a geolocation API. Its not the same as the <code>navigator.geolocation</code> API, but it serves the same purpose.
+		<p>There are also device-specific geolocation <abbr>API</abbr>s on older mobile phone platforms, including <a href="#">BlackBerry</a>, <a href="#">Nokia</a>, <a href="#">Palm</a>, and <a href=#>OMTP BONDI</a>.
+		<p>The <a href=#>chapter on geolocation</a> will go into excruciating detail about how to use all of these different APIs.
+
+
+
+		<h1>❧</h1><br/>
+		<h2>Input Types</h2>
+		<img src="openclipart.org_johnny_automatic_typewriter.png" width="300px" />
+		<p>You know all about web forms, right? Make a <code>&lt;form></code>, add a few <code>&lt;input type="text"></code> elements and maybe an <code>&lt;input type="password"></code>, and finish it off with an <code>&lt;input type="submit"></code> button.
+		<p>You dont know the half of it. HTML5 defines over a dozen new input types that you can use in your forms.
+		<ol>
+			<li><a href=#><code>&lt;input type="search"></code></a> for search boxes
+			<li><a href=#><code>&lt;input type="number"></code></a> for spinboxes
+			<li><a href=#><code>&lt;input type="range"></code></a> for sliders
+			<li><a href=#><code>&lt;input type="color"></code></a> for color pickers
+			<li><a href=#><code>&lt;input type="tel"></code></a> for telephone numbers
+			<li><a href#><code>&lt;input type="url"></code></a> for web addresses
+			<li><a href=#><code>&lt;input type="email"></code></a> for email addresses
+			<li><a href=#><code>&lt;input type="date"></code></a> for calendar date pickers
+			<li><a href=#><code>&lt;input type="month"></code></a> for months
+			<li><a href=#><code>&lt;input type="week"></code></a> for weeks
+			<li><a href=#><code>&lt;input type="time"></code></a> for timestamps
+			<li><a href=#><code>&lt;input type="datetime"></code></a> for precise, absolute date+time stamps
+			<li><a href=#><code>&lt;input type="datetime-local"></code></a> for local dates and times
+		</ol>
+		<p>Checking for HTML5 input types uses <a href=#>detection technique #4</a>. First, you create a dummy <code>&lt;input></code> element in memory. The default input type for all <code>&lt;input></code> elements is <code>"text"</code>. This will prove to be vitally important.
+		<pre><code>  var i = document.createElement("input");</code></pre>
+		<p>Next, set the <code>type</code> attribute on the dummy <code>&lt;input></code> element to the input type you want to detect.
+		<pre><code>  i.setAttribute("type", "color");</code></pre>
+		<p>If your browser supports that particular input type, the <code>type</code> property will retain the value you set. If your browser doesnt support that particular input type, it will ignore the value you set and the <code>type</code> property will still be <code>"text"</code>.
+		<pre><code>  return i.type !== "text";</code></pre>
+		<p>Instead of writing 13 separate functions yourself, you can use <a href=#>Modernizr</a> to detect support for all the new input types defined in HTML5. Modernizr reuses a single <code>&lt;input></code> element to efficiently detect support for all 13 input types. Then it builds a hash called <code>Modernizr.inputtypes</code>, that contains 13 keys (the HTML5 <code>type</code> attributes) and 13 Boolean values (<code>true</code> if supported, <code>false</code> if not).
+		<p> check for native date picker</p>
+		<pre><code>if (<mark>!Modernizr.inputtypes.date</mark>) {
+		  // no native support for &lt;input type="date"> :(
+		  // maybe build one yourself with <a href=#>Dojo</a> or <a href=#>jQueryUI</a>
+		}</code></pre>
+
+		<h1>❧</h1><br/>
+		<h2 >Placeholder Text</h2>
+		<p>Besides <a href=#>new input types</a>, HTML5 includes several small tweaks to existing forms. One improvement is the ability to set <a href=#>placeholder text in an input field</a>. Placeholder text is displayed inside the input field as long as the field is empty and not focused. As soon you click on (or tab to) the input field, the placeholder text disappears. The <a href=#>chapter on web forms</a> has screenshots if youre having trouble visualizing it.
+		<p>Checking for placeholder support uses <a href=#>detection technique #2</a>. If your browser supports placeholder text in input fields, the DOM object it creates to represent an <code>&lt;input></code> element will have a <code>placeholder</code> property (even if you dont include a <code>placeholder</code> attribute in your HTML). If your browser doesnt support placeholder text, the DOM object it creates for an <code>&lt;input></code> element will not have a <code>placeholder</code> property.
+		<pre><code>function supports_input_placeholder() {
+		  var i = document.createElement('input');
+		  return 'placeholder' in i;
+		}</code></pre>
+		<p>Instead of writing this function yourself, you can use <a href=#>Modernizr</a> (1.1 or later) to detect support for placeholder text.
+		<p> check for placeholder text</p>
+		<pre><code>if (<mark>Modernizr.input.placeholder</mark>) {
+		  // your placeholder text should already be visible!
+		} else {
+		  // no placeholder support :(
+		  // fall back to a scripted solution
+		}</code></pre>
+
+		<h1>❧</h1><br/>
+		<h2>Form Autofocus</h2>
+		<img src="openclipart.org_johnny_automatic_angry_guy.png" width="150px" />
+		<p>Web sites can use JavaScript to focus the first input field of a web form automatically. For example, the home page of <a href=#>Google.com</a> will autofocus the input box so you can type your search keywords without having to position the cursor in the search box. While this is convenient for most people, it can be annoying for power users or people with special needs. If you press the space bar expecting to scroll the page, the page will not scroll because the focus is already in a form input field. (It types a space in the field instead of scrolling.) If you focus a different input field while the page is still loading, the sites autofocus script may helpfully move the focus back to the original input field upon completion, disrupting your flow and causing you to type in the wrong place.
+		<p>Because the autofocusing is done with JavaScript, it can be tricky to handle all of these edge cases, and there is little recourse for people who dont want a web page to steal the focus.
+		<p>To solve this problem, HTML5 introduces <a href=#>an <code>autofocus</code> attribute on all web form controls</a>. The <code>autofocus</code> attribute does exactly what it says on the tin: it moves the focus to a particular input field. But because its just markup instead of a script, the behavior will be consistent across all web sites. Also, browser vendors (or extension authors) can offer users a way to disable the autofocusing behavior.
+		<p>Checking for autofocus support uses <a href=#>detection technique #2</a>. If your browser supports autofocusing web form controls, the DOM object it creates to represent an <code>&lt;input></code> element will have an <code>autofocus</code> property (even if you dont include the <code>autofocus</code> attribute in your HTML). If your browser doesnt support autofocusing web form controls, the DOM object it creates for an <code>&lt;input></code> element will not have an <code>autofocus</code> property. You can detect autofocus support with this function:
+		<pre><code>function supports_input_autofocus() {
+		  var i = document.createElement('input');
+		  return 'autofocus' in i;
+		}</code></pre>
+		<p>Instead of writing this function yourself, you can use <a href=#>Modernizr</a> (1.1 or later) to detect support for autofocused form fields.
+		<p> check for autofocus support</p>
+		<pre><code>if (<mark>Modernizr.input.autofocus</mark>) {
+		  // autofocus works!
+		} else {
+		  // no autofocus support :(
+		  // fall back to a scripted solution
+		}</code></pre>
+
+		<h1>❧</h1><br/>
+		<h2>Microdata</h2>
+		<img src="openclipart.org_johnny_automatic_divider_cards.png" width="300px" />
+		<p><a href=#>Microdata</a> is a standardized way to provide additional semantics in your web pages. For example, you can use microdata to declare that a photograph is available under a specific Creative Commons license. As you&#8217;ll see in <a href=#>the distributed extensibility chapter</a>, you can use microdata to mark up an About Me page. Browsers, browser extensions, and search engines can convert your HTML5 microdata markup into a <a href=#>vCard</a>, a standard format for sharing contact information. You can also define your own microdata vocabularies.
+		<p>The HTML5 microdata standard includes both HTML markup (primarily for search engines) and a set of DOM functions (primarily for browsers). Theres no harm in including microdata markup in your web pages. Its nothing more than a few well-placed attributes, and search engines that dont understand the microdata attributes will just ignore them. But if you need to access or manipulate microdata through the DOM, youll need to check whether the browser supports the microdata DOM API.
+		<p>Checking for HTML5 microdata API support uses <a href=#>detection technique #1</a>. If your browser supports the HTML5 microdata API, there will be a <code>getItems()</code> function on the global <code>document</code> object. If your browser doesnt support microdata, the <code>getItems()</code> function will be undefined.
+		<pre><code>function supports_microdata_api() {
+		  return !!document.getItems;
+		}</code></pre>
+		<p>Modernizr does not yet support checking for the microdata API, so youll need to use the function like the one listed above.
+
+		<h1>❧</h1><br/>
+		<h2>History API</h2>
+		<img src="openclipart.org_johnny_automatic_demon_reading_Stewart_Orr.png" width="150px" />
+		<p>The <a href=#>HTML5 history API</a> is a standardized way to manipulate the browser history via script. Part of this API- navigating the history - has been available in previous versions of HTML. The new part in HTML5 is a way to add entries to the browser history, and respond when those entries are removed from the stack by the user pressing the browsers back button. This means that the URL can continue to do its job as a unique identifier for the current resource, even in script-heavy applications that dont ever perform a full page refresh.
+		<p>Checking for HTML5 history API support uses <a href=#>detection technique #1</a>. If your browser supports the HTML5 history API, there will be a <code>pushState()</code> function on the global <code>history</code> object. If your browser doesnt support the history API, the <code>pushState()</code> function will be undefined.
+		<pre><code>function supports_history_api() {
+		  return !!(window.history && history.pushState);
+		}</code></pre>
+		<p>Instead of writing this function yourself, you can use <a href=#>Modernizr</a> (1.6 or later) to detect support for the HTML5 history API.</p>
+		<p> check for history API support
+		<pre><code>if (<mark>Modernizr.history</mark>) {
+		  // history management works!
+		} else {
+		  // no history support :(
+		  // fall back to a scripted solution like <a href=#>History.js</a>
+		}</code></pre>
+		
+		<h1>❧</h1><br/>
+		<h2 >Further Reading</h2>
+		<p>Specifications and standards:</p>
+		<ul>
+		<li><a href=#>the <code>&lt;canvas></code> element</a>
+		<li><a href=#>the <code>&lt;video></code> element</a>
+		<li><a href=#><code>&lt;input></code> types</a>
+		<li><a href=#>the <code>&lt;input placeholder></code> attribute</a>
+		<li><a href=#>the <code>&lt;input autofocus></code> attribute</a>
+		<li><a href=#>HTML5 storage</a>
+		<li><a href=#>Web Workers</a>
+		<li><a href=#>Offline web applications</a>
+		<li><a href=#>Geolocation API</a>
+		<li><a href=#>Session history and navigation</a>
+		</ul>
+		<p>JavaScript libraries:</p>
+		<ul>
+		<li><a href=#>Modernizr</a>, an HTML5 detection library
+		<li><a href=#>geo.js</a>, a geolocation API wrapper
+		<li><a href=#>HTML5 Cross-browser Polyfills</a>
+		</ul>
+		<p>Other articles and tutorials:</p>
+		<ul>
+		<li><a href=#>Video for Everybody!</a>
+		<li><a href=#>A gentle introduction to video encoding</a>
+		<li><a href=#>Video type parameters</a>
+		<li><a href=#>The All-In-One Almost-Alphabetical No-Bullshit Guide to Detecting Everything</a>
+		<li><a href=#>Internet Explorer 9 Guide for Developers</a>
+		</ul>
+		
+		<h1>❧</h1><br/>
+		<p>This has been Detecting HTML5 Features. The <a href=#>full table of contents</a> has more if youd like to keep reading.
+		<div >
+		<h4>Did You Know?</h4>
+		<div >
+		<blockquote><p>In association with Google Press, OReilly is distributing this book in a variety of formats, including paper, ePub, Mobi, and DRM-free PDF. The paid edition is called HTML5: Up Running,; and it is available now. This chapter is included in the paid edition.
+		<p>If you liked this chapter and want to show your appreciation, you can <a href=#>buy HTML5: Up & Running with this affiliate link</a> or <a href=#>buy an electronic edition directly from OReilly</a>. Youll get a book, and Ill get a buck. I do not currently accept direct donations.
+		</blockquote>
+		</div>
+		</div>
+
+		<p>Copyright MMIX–MMXI <a href=#>Mark Pilgrim</a></p>
+		<input value="powered by Google"/>
+	</body>
+</html>
